@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Formulario de contacto</title>
+  <style>
+    :root{
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --accent:#2563eb;
+      --muted:#6b7280;
+      --radius:10px;
+      --maxw:720px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{
+      margin:0;
+      padding:2rem;
+      background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      color:#111827;
+    }
+    .container{
+      width:100%;
+      max-width:var(--maxw);
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:0 6px 24px rgba(15,23,42,0.08);
+      padding:1.25rem;
+    }
+    h1{ margin:0 0 0.5rem 0; font-size:1.25rem; }
+    p.lead{ margin:0 0 1rem 0; color:var(--muted); font-size:0.95rem; }
+    form {
+      display:grid;
+      gap:0.75rem;
+      grid-template-columns: 1fr 1fr;
+    }
+    label{ font-size:0.85rem; color:#374151; display:block; margin-bottom:0.25rem; }
+    .full { grid-column: 1 / -1; }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    select,
+    textarea {
+      width:100%;
+      padding:0.6rem 0.75rem;
+      border:1px solid #e5e7eb;
+      border-radius:8px;
+      font-size:0.95rem;
+      background:transparent;
+      box-sizing:border-box;
+    }
+    textarea{ min-height:110px; resize:vertical; }
+    .group-inline { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; }
+    .muted{ color:var(--muted); font-size:0.85rem; }
+    .actions{ display:flex; gap:0.5rem; justify-content:flex-end; align-items:center; margin-top:0.5rem; }
+    button{
+      background:var(--accent);
+      color:white;
+      border:none;
+      padding:0.6rem 0.9rem;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button.secondary{
+      background:transparent;
+      color:var(--accent);
+      border:1px solid #c7d2fe;
+    }
+    .result{
+      margin-top:1rem;
+      padding:0.75rem;
+      background:#0f172a10;
+      border-radius:8px;
+      font-family:monospace;
+      white-space:pre-wrap;
+      color:#0f172a;
+    }
+    @media (max-width:640px){
+      form { grid-template-columns: 1fr; }
+      .actions{ justify-content:stretch; flex-direction:column-reverse; }
+      button{ width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-labelledby="form-title">
+    <h1 id="form-title">Formulario de contacto</h1>
+    <p class="lead">Completa los datos y pulsa <strong>Enviar</strong>. Se mostrará una vista previa del envío sin recargar.</p>
+
+    <form id="contactForm" action="#" method="post" novalidate>
+      <div class="full">
+        <label for="fullname">Nombre completo</label>
+        <input id="fullname" name="fullname" type="text" placeholder="Ej. María Pérez" required minlength="3" />
+      </div>
+
+      <div>
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" placeholder="ejemplo@dominio.com" required />
+      </div>
+
+      <div>
+        <label for="phone">Teléfono (opcional)</label>
+        <input id="phone" name="phone" type="text" inputmode="tel" placeholder="+34 612 345 678" pattern="^[0-9+\-\s]{6,}$" />
+      </div>
+
+      <div>
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" minlength="6" placeholder="mínimo 6 caracteres" required />
+      </div>
+
+      <div>
+        <label for="birthday">Fecha de nacimiento</label>
+        <input id="birthday" name="birthday" type="date" />
+      </div>
+
+      <div>
+        <label for="subject">Asunto</label>
+        <select id="subject" name="subject" required>
+          <option value="">-- Selecciona --</option>
+          <option>Soporte</option>
+          <option>Consulta general</option>
+          <option>Feedback</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <label for="message">Mensaje</label>
+        <textarea id="message" name="message" placeholder="Escribe tu mensaje..." required></textarea>
+      </div>
+
+      <fieldset class="full" aria-labelledby="pref-label" style="border:none;padding:0;margin:0;">
+        <legend id="pref-label" class="muted" style="font-size:0.9rem;margin-bottom:0.5rem;">Preferencias</legend>
+        <div class="group-inline">
+          <label><input type="radio" name="contactTime" value="mañana" checked /> Mañana</label>
+          <label><input type="radio" name="contactTime" value="tarde" /> Tarde</label>
+          <label><input type="radio" name="contactTime" value="indiferente" /> Indiferente</label>
+
+          <label style="margin-left:1rem;"><input type="checkbox" name="newsletter" /> Suscribirme al boletín</label>
+        </div>
+      </fieldset>
+
+      <div class="full actions">
+        <button type="submit">Enviar</button>
+        <button type="reset" class="secondary">Limpiar</button>
+      </div>
+    </form>
+
+    <div id="output" class="result" aria-live="polite" style="display:none;"></div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById('contactForm');
+      const output = document.getElementById('output');
+
+      // Muestra mensajes de validación personalizados si es necesario
+      form.addEventListener('invalid', (e) => {
+        e.preventDefault();
+        const field = e.target;
+        if (field.validity.valueMissing) {
+          field.setCustomValidity('Este campo es obligatorio.');
+        } else if (field.validity.typeMismatch) {
+          field.setCustomValidity('Formato no válido.');
+        } else if (field.validity.tooShort) {
+          field.setCustomValidity('Introduce más caracteres.');
+        } else {
+          field.setCustomValidity('');
+        }
+        field.reportValidity();
+      }, true);
+
+      // Limpia custom validity al escribir
+      form.addEventListener('input', (e) => {
+        e.target.setCustomValidity('');
+      });
+
+      // Maneja el submit (previene recarga y muestra los datos)
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        const data = new FormData(form);
+        const obj = {};
+        data.forEach((v,k) => {
+          // normalizar checkboxes/radios duplicados
+          if (obj[k] !== undefined) {
+            if (!Array.isArray(obj[k])) obj[k] = [obj[k]];
+            obj[k].push(v);
+          } else {
+            obj[k] = v;
+          }
+        });
+
+        output.style.display = 'block';
+        output.textContent = JSON.stringify(obj, null, 2);
+        // Aquí podrías enviar `obj` con fetch a tu backend si lo deseas:
+        // fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj) })
+      });
+    })();
+  </script>
+</body>
+</html>
